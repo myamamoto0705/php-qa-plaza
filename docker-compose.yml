@@ -1,0 +1,34 @@
+version: '3'
+services:
+    web:
+        container_name: php-book
+        build:
+          context: .
+          dockerfile: ./Docker/php/Dockerfile
+        volumes:
+          - .:/var/www/html:cached
+        #command: bash -c "sh docker-init-setup.sh && apache2-foreground"
+        environment:
+          - APP_DEFAULT_LOCALE=ja_JP
+          - APP_DEFAULT_TIMEZONE=Asia/Tokyo
+          - DATABASE_HOST=php-book-db
+          - DATABASE_USER=root
+          - DATABASE_PASS=secret
+          - DATABASE_NAME=qa_app
+        ports:
+          - "5000:80"
+        privileged: true
+
+    db:
+      container_name: php-book-db
+      build:
+        context: .
+        dockerfile: ./Docker/mysql/Dockerfile
+      environment:
+        - MYSQL_ROOT_PASSWORD=secret
+      volumes:
+        - ./Docker/mysql/sqls:/docker-entrypoint-initdb.d
+        - ./Docker/mysql/data:/var/lib/mysql
+      command: --innodb-use-native-aio=0
+      ports:
+        - "3306:3306"
